@@ -19,14 +19,14 @@ return new class extends Migration {
             'title' => '默认（无权限）',
         ]);
 
-        $teamAdmin = Bouncer::role()->firstOrCreate([
-            'name' => 'manager',
-            'title' => '团队管理员',
+        Bouncer::ability()->firstOrCreate([
+            'name' => 'manage/team',
+            'title' => '管理团队',
         ]);
 
         Bouncer::ability()->firstOrCreate([
-            'name' => 'manage/all-team',
-            'title' => '管理组织架构',
+            'name' => 'manage/user',
+            'title' => '管理用户',
         ]);
 
         Bouncer::ability()->firstOrCreate([
@@ -39,15 +39,8 @@ return new class extends Migration {
             'title' => '查看审计日志',
         ]);
 
-        $manageTeam = Bouncer::ability()->firstOrCreate([
-            'name' => 'manage/my-team',
-            'title' => '管理所在团队',
-        ]);
-
         Bouncer::allow($admin)->everything();
         Bouncer::assign($admin)->to(User::find(User::ROOT_ID));
-
-        Bouncer::allow($teamAdmin)->to($manageTeam);
 
     }
 
