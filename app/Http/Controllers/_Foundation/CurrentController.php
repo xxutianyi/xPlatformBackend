@@ -4,7 +4,7 @@ namespace App\Http\Controllers\_Foundation;
 
 use App\Http\Controllers\Controller;
 use App\Models\_Foundation\Audit;
-use App\Models\User;
+use App\Models\_Foundation\User;
 use App\Utils\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +15,12 @@ class CurrentController extends Controller
 {
     public function show(Request $request)
     {
-        return new Response($request, $request->user());
+        $data = [
+            'user' => $request->user(),
+            'access' => $request->user()->getAccess()
+        ];
+
+        return new Response($request, $data);
     }
 
     public function update(Request $request)

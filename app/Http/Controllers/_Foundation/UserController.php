@@ -5,7 +5,7 @@ namespace App\Http\Controllers\_Foundation;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendInitPasswordJob;
 use App\Models\_Foundation\Audit;
-use App\Models\User;
+use App\Models\_Foundation\User;
 use App\Utils\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,8 @@ class UserController extends Controller
 
         $data = User::select()
             ->orderByRaw('name is null, CONVERT(name using GBK) collate gbk_chinese_ci')
-            ->with(['teams', 'roles']);
+            ->with(['teams', 'roles'])/*->whereNot('id', User::ROOT_ID)*/
+        ;
 
         if ($request->filled('search')) {
             $search = $request->string('search');
@@ -67,18 +68,21 @@ class UserController extends Controller
             'name' => ['required'],
             'mobile' => ['required', Rule::unique('users')],
             'team_ids' => ['required', 'array', 'exists:teams,id'],
+            'role_names' => ['required', 'array', 'exists:roles,name'],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
-            'mobile' => $validated['mobile']
+            'mobile' => $validated['mobile'],
+            'avatar' => '/images/avatar.jpg'
         ]);
 
-        $password = Str::password(8);
+        $password = Str::password(8, true, true, false);
         $user->password = Hash::make($password);
+        $user->assign($validated['role_names']);
         $user->save();
 
-        SendInitPasswordJob::dispatchAfterResponse($user->mobile, $password);
+        //SendInitPasswordJob::dispatchAfterResponse($user->mobile, $password);
 
         $user->teams()->sync($validated['team_ids']);
 
@@ -91,7 +95,7 @@ class UserController extends Controller
             'new' => $user,
         ]);
 
-        return new Response($request, $user);
+        return new Response($request, $password);
     }
 
     public function show(Request $request, User $user)
@@ -105,6 +109,7 @@ class UserController extends Controller
             'name' => ['required'],
             'mobile' => ['required', Rule::notIn('users')],
             'team_ids' => ['required', 'array', 'exists:teams,id'],
+            'role_names' => ['required', 'array', 'exists:roles,name'],
         ]);
 
         $original = User::find($user->id);
@@ -114,6 +119,8 @@ class UserController extends Controller
 
         $user->name = $validated['name'];
         $user->mobile = $validated['mobile'];
+        $user->retract($user->getRoles());
+        $user->assign($validated['role_names']);
 
         Audit::create([
             'user_id' => Auth::id(),

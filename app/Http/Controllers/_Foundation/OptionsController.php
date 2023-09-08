@@ -12,7 +12,7 @@ use Silber\Bouncer\Database\Role;
 
 class OptionsController extends Controller
 {
-    public function abilities(Request $request)
+    public function access(Request $request)
     {
         $data = Ability::select()->whereNot('name', '*')->get();
 

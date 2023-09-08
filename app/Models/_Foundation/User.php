@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
 
 class User extends Authenticatable
@@ -52,5 +53,18 @@ class User extends Authenticatable
     public function audits(): HasMany
     {
         return $this->hasMany(Audit::class);
+    }
+
+    public function getAccess(): array
+    {
+        $abilities = Ability::select('name')->get();
+        $access = [];
+
+        $abilities->map(function (Ability $ability) use (&$access) {
+            $accessKey = str_replace(['/', '-'], '_', $ability->getAttribute('name'));
+            $access[$accessKey] = $this->can($ability);
+        });
+
+        return $access;
     }
 }

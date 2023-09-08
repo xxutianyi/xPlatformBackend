@@ -30,6 +30,15 @@ class AuthController extends Controller
         return new Response($request, Auth::user());
     }
 
+    public function verifyCode(Request $request)
+    {
+        $request->validate([
+            'mobile' => ['required', 'string']
+        ]);
+
+        return new Response($request, VerifyCode::generate($request->string('mobile')));
+    }
+
     public function mobileVerify(MobileVerifyRequest $request)
     {
         $request->authenticate();
@@ -45,10 +54,6 @@ class AuthController extends Controller
         return new Response($request, Auth::user());
     }
 
-    public function verifyCode(Request $request, string $mobile)
-    {
-        return new Response($request, VerifyCode::generate($mobile));
-    }
 
     public function destroy(Request $request)
     {
@@ -101,7 +106,7 @@ class AuthController extends Controller
 
 
         Audit::create([
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'user_id' => Auth::id(),
             'comment' => '用户登录：企业微信登录',
             'ip' => $request->getClientIp(),
         ]);

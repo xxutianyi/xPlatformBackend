@@ -5,6 +5,7 @@ namespace App\Http\Controllers\_Foundation;
 use App\Http\Controllers\Controller;
 use App\Models\_Foundation\Audit;
 use App\Models\_Foundation\Team;
+use App\Models\_Foundation\TeamUser;
 use App\Utils\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

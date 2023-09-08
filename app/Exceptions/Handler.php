@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+use App\Utils\Response;
+use App\Utils\ShowType;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +30,41 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        if ($request->expectsJson() && is_a($e, ValidationException::class)) {
+            return new Response(
+                $request,
+                $e->errors(),
+                $e->getMessage(),
+                ShowType::ERROR_MESSAGE,
+                422,
+            );
+        }
+
+        if ($request->expectsJson() && is_a($e, AuthenticationException::class)) {
+            return new Response(
+                $request,
+                null,
+                $e->getMessage(),
+                ShowType::SILENT,
+                401,
+            );
+        }
+
+        if ($request->expectsJson()) {
+            return new Response(
+                $request,
+                $this->convertExceptionToArray($e),
+                $e->getMessage(),
+                ShowType::ERROR_MESSAGE,
+                $this->isHttpException($e) ? $e->getStatusCode() : 500,
+                $this->isHttpException($e) ? $e->getHeaders() : [],
+            );
+        }
+
+        return parent::render($request, $e);
     }
 }

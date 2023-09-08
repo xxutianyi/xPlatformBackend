@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('email')->unique()->nullable();
             $table->string('password')->nullable();
             $table->string('wework_id')->unique()->nullable();
-            $table->string('external_id')->unique()->nullable();
             $table->string('avatar')->nullable();
             $table->softDeletes();
             $table->rememberToken();

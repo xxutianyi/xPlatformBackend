@@ -65,6 +65,16 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'request' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/request.log'),
+        ],
+
+        'history' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/history.log'),
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
