@@ -28,7 +28,7 @@ Route::middleware('api')->group(function () {
         Route::get('audits', Foundation\AuditsController::class);
 
         Route::get('current', [Foundation\CurrentController::class, 'show']);
-        Route::get('current/user', [Foundation\CurrentController::class, 'update']);
+        Route::put('current/user', [Foundation\CurrentController::class, 'update']);
         Route::put('current/password', [Foundation\CurrentController::class, 'password']);
 
         Route::prefix('options')->group(function () {
